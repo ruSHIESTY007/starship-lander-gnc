@@ -47,3 +47,7 @@ build:
 
 clean:
 	rm -rf build
+
+bench: build/libfsw.a
+	$(CC) $(CSTD) -O2 -Iinclude -fsingle-precision-constant tests/bench.c build/libfsw.a -lm -o build/bench
+	./build/bench

@@ -31,6 +31,7 @@
 #define FLIP_PRE_TIME         4.0f        /* max aerodynamic pitch-up time before ignition [s] */
 #define FLIP_IGNITE_ERR       0.610865f   /* ignite once within 35 deg of the thrust attitude */
 #define FLIP_DISP             25.0f       /* backward flip displacement along heading (flip + its velocity) [m] */
+#define NN_HANDOVER_T         3.0f        /* s to gate: learned policy -> ZEM/ZEV */
 #define FLIP_WATCHDOG_T       7.0f
 #define FLIP_WATCHDOG_H       250.0f
 #define FLIP_PRE_TIME_EST     3.0f        /* expected pre-flip duration used in the trigger */
@@ -66,6 +67,7 @@ typedef struct {
     float mu_abort;
     int32_t divert_priority;
     int32_t frame;
+    int32_t nn_handed_over;   /* learned policy -> ZEM/ZEV handover latched */
     int32_t burn_single;      /* latched: burn continues on one engine (2-engine floor > demand) */
     float   single_timer;
 } fsw_state_t;
@@ -156,6 +158,7 @@ void fsw_init(const fsw_init_t *init)
     S.mu_abort = 0.0f;
     S.divert_priority = 0;
     S.burn_single = 0;
+    S.nn_handed_over = 0;
     S.single_timer = 0.0f;
     enter_mode(MODE_GLIDE);
 }
@@ -277,16 +280,24 @@ static void thrust_attitude(const float u[3], const float heading[3], float q_de
 /** Powered guidance acceleration command (L) for the current target. */
 static void powered_guidance(const float a_drift[3], float dt, float a_cmd[3])
 {
-    if (S.cfg.guidance_law == GUID_NEURAL) {
-        float r_rel[3];
-        v3_sub(r_rel, S.nav.p, S.pdg.r_tgt);
-        if (nn_policy_accel(r_rel, S.nav.v, a_drift, S.mass, a_cmd) == 0) {
-            S.pdg.tgo = fmaxf(S.pdg.tgo - dt, 0.3f);
-            return;
-        }
-    }
+    /* ZEM/ZEV always runs: it also provides the time-to-go used for the terminal handover */
     pdg_step(&S.pdg, S.nav.p, S.nav.v, a_drift, dt);
     v3_copy(a_cmd, S.pdg.a_cmd);
+    if (S.cfg.guidance_law == GUID_NEURAL && !S.nn_handed_over) {
+        /* learned policy shapes the burn; a runtime monitor hands over to the verified
+         * feedback law for the final seconds (or if the policy stops descending) */
+        float r_rel[3], a_nn[3];
+        const float h = S.nav.p[2] - S.pdg.r_tgt[2];
+        if (h / fmaxf(-S.nav.v[2], 1e-3f) < NN_HANDOVER_T || (S.nav.v[2] > -1.0f && h > 5.0f)) {
+            S.nn_handed_over = 1;
+            S.pdg.initialized = 0;      /* fresh optimal tgo from the actual state */
+            pdg_step(&S.pdg, S.nav.p, S.nav.v, a_drift, dt);
+            v3_copy(a_cmd, S.pdg.a_cmd);
+            return;
+        }
+        v3_sub(r_rel, S.nav.p, S.pdg.r_tgt);
+        if (nn_policy_accel(r_rel, S.nav.v, a_drift, S.mass, a_nn) == 0) { v3_copy(a_cmd, a_nn); }
+    }
 }
 
 void fsw_step(const fsw_input_t *in, fsw_cmd_t *cmd, fsw_tlm_t *tlm)
