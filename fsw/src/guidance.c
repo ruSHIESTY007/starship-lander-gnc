@@ -239,7 +239,7 @@ int thrust_project(const float F_des[3], float T_min, float T_max, float tilt_ma
 
 /* ============================ terminal ============================ */
 void terminal_accel(const float r[3], const float v[3], const float pad[3], float h_gate,
-                    float v_gate, const float a_drift[3], float a_cmd[3])
+                    float v_gate, const float a_drift[3], int32_t hover_ok, float a_cmd[3])
 {
     const float h = r[2] - pad[2];
     const float frac = gnc_clampf(h / h_gate, 0.0f, 1.0f);
@@ -254,7 +254,7 @@ void terminal_accel(const float r[3], const float v[3], const float pad[3], floa
     if (vh > vh_max) { vref[0] *= vh_max / vh; vref[1] *= vh_max / vh; }
     /* hover-translate: slow the descent while far from the pad (costs propellant, buys accuracy) */
     eh = sqrtf((r[0] - pad[0]) * (r[0] - pad[0]) + (r[1] - pad[1]) * (r[1] - pad[1]));
-    slow = (h > 8.0f) ? gnc_clampf(1.4f - eh / 10.0f, 0.3f, 1.0f) : 1.0f;
+    slow = (h > 8.0f && hover_ok) ? gnc_clampf(1.4f - eh / 10.0f, 0.3f, 1.0f) : 1.0f;
     vref[2] = -(TERM_V_TD + (v_gate - TERM_V_TD) * frac) * slow;
     for (i = 0; i < 3; ++i) {
         const float k = (i == 2) ? TERM_K_V : TERM_K_VH;

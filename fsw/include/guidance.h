@@ -99,8 +99,9 @@ int thrust_project(const float F_des[3], float T_min, float T_max, float tilt_ma
 #define TERM_K_P        0.25f     /* lateral position gain [1/s] */
 #define TERM_VH_MAX     2.5f
 
+/** hover_ok = 0 (low propellant): no hover-translate, descend where we are. */
 void terminal_accel(const float r[3], const float v[3], const float pad[3], float h_gate,
-                    float v_gate, const float a_drift[3], float a_cmd[3]);
+                    float v_gate, const float a_drift[3], int32_t hover_ok, float a_cmd[3]);
 
 /* ---------------- engine-out abort ---------------- */
 /**

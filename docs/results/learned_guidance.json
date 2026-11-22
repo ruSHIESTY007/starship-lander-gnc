@@ -1,0 +1,22 @@
+{
+  "history": [
+    {
+      "iter": 0,
+      "rollout_success": 0.125,
+      "n_visits": 1600
+    },
+    {
+      "iter": 1,
+      "rollout_success": 0.1375,
+      "n_visits": 1600
+    },
+    {
+      "iter": 2,
+      "rollout_success": 0.14375,
+      "n_visits": 1600
+    }
+  ],
+  "n_samples": 24770,
+  "n_params": 4953,
+  "wall_s": 401.2186303138733
+}

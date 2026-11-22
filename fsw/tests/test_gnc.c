@@ -139,7 +139,7 @@ static void test_terminal_descent_profile(void)
     float r[3] = { 3, -2, 30 }, v[3] = { 0, 0, -3 }, a[3];
     int k, i;
     for (k = 0; k < 6000 && r[2] > 0.0f; ++k) {
-        terminal_accel(r, v, pad, 30.0f, 3.0f, ag, a);
+        terminal_accel(r, v, pad, 30.0f, 3.0f, ag, 1, a);
         for (i = 0; i < 3; ++i) { v[i] += (a[i] + ag[i]) * 0.01f; r[i] += v[i] * 0.01f; }
     }
     printf("    touchdown v=(%.2f %.2f %.2f) at (%.2f %.2f)\n", v[0], v[1], v[2], r[0], r[1]);

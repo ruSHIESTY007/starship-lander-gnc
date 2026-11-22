@@ -32,6 +32,7 @@
 #define FLIP_IGNITE_ERR       0.610865f   /* ignite once within 35 deg of the thrust attitude */
 #define FLIP_DISP             25.0f       /* backward flip displacement along heading (flip + its velocity) [m] */
 #define NN_HANDOVER_T         3.0f        /* s to gate: learned policy -> ZEM/ZEV */
+#define PROP_RESERVE          4000.0f     /* kg: below this, terminal stops hover-translating */
 #define FLIP_WATCHDOG_T       7.0f
 #define FLIP_WATCHDOG_H       250.0f
 #define FLIP_PRE_TIME_EST     3.0f        /* expected pre-flip duration used in the trigger */
@@ -488,7 +489,9 @@ void fsw_step(const fsw_input_t *in, fsw_cmd_t *cmd, fsw_tlm_t *tlm)
     case MODE_TERMINAL: {
         float a_drift[3], Tmin, Tmax, u[3], d_b[3], d_L[3];
         v3_add(a_drift, g_vec, a_aero_L);
-        terminal_accel(S.nav.p, S.nav.v, S.target_cg, S.cfg.h_gate, S.cfg.v_gate, a_drift, a_cmd);
+        /* propellant-aware: below the reserve, stop hover-translating and land where we are */
+        terminal_accel(S.nav.p, S.nav.v, S.target_cg, S.cfg.h_gate, S.cfg.v_gate, a_drift,
+                       (S.mass - VEH_M_DRY) > PROP_RESERVE ? 1 : 0, a_cmd);
         v3_scale(F_des, a_cmd, S.mass);
         if (newly_failed && count_healthy() == 0) { enter_mode(MODE_ABORT_NO_THRUST); break; }
         /* stay on the burn engines until the demand fits on one engine, then shut down */

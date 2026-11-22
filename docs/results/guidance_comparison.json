@@ -1,0 +1,67 @@
+{
+  "n_states": 200,
+  "gfold_fuel_mean": 4290.185060358062,
+  "zemzev_1": {
+    "fuel_gap_pct_mean": 17.3819950824552,
+    "fuel_gap_pct_p95": 23.147187833318053,
+    "gate_success": 0.98,
+    "dv_mean": 0.34657755115490263,
+    "drh_mean": 0.02123756085062782
+  },
+  "zemzev_2": {
+    "fuel_gap_pct_mean": 17.089431941534286,
+    "fuel_gap_pct_p95": 22.49154626635507,
+    "gate_success": 0.97,
+    "dv_mean": 0.3599608891435555,
+    "drh_mean": 0.022669847604664447
+  },
+  "zemzev_4": {
+    "fuel_gap_pct_mean": 16.557670380379168,
+    "fuel_gap_pct_p95": 21.8624622567916,
+    "gate_success": 0.97,
+    "dv_mean": 0.39899711500465074,
+    "drh_mean": 0.024554898179260966
+  },
+  "zemzev_6": {
+    "fuel_gap_pct_mean": 15.970052929148581,
+    "fuel_gap_pct_p95": 21.150821874267336,
+    "gate_success": 0.96,
+    "dv_mean": 0.36303830798609804,
+    "drh_mean": 0.027172842198086702
+  },
+  "zemzev_10": {
+    "fuel_gap_pct_mean": 15.021562114745512,
+    "fuel_gap_pct_p95": 19.742686604878944,
+    "gate_success": 0.96,
+    "dv_mean": 0.41526194350411216,
+    "drh_mean": 0.032138458165993644
+  },
+  "zemzev_20": {
+    "fuel_gap_pct_mean": 12.92787078588829,
+    "fuel_gap_pct_p95": 17.01607424641949,
+    "gate_success": 0.935,
+    "dv_mean": 0.4329002731670512,
+    "drh_mean": 0.04619032228164846
+  },
+  "zemzev_40": {
+    "fuel_gap_pct_mean": 9.830571351411296,
+    "fuel_gap_pct_p95": 13.24203171666818,
+    "gate_success": 0.885,
+    "dv_mean": 0.4392695607327573,
+    "drh_mean": 0.08163571916334139
+  },
+  "nn": {
+    "fuel_gap_pct_mean": 30.874211341875533,
+    "fuel_gap_pct_p95": 235.35682826309687,
+    "gate_success": 0.035,
+    "dv_mean": 3.7747462474080384,
+    "drh_mean": 6.538233206863458
+  },
+  "hybrid": {
+    "fuel_gap_pct_mean": 13.415395306912313,
+    "fuel_gap_pct_p95": 32.144631627817134,
+    "gate_success": 0.97,
+    "dv_mean": 0.36941771071970597,
+    "drh_mean": 0.003858328323466207
+  }
+}

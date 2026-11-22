@@ -1,0 +1,6 @@
+fsw_step (glide, GNSS 10 Hz, radar 20 Hz, wind EKF 20 Hz): mean 4.96 us, worst 45.04 us
+nav_propagate (18-state ESKF covariance):   3.11 us
+nav_update_gnss_pos (gate + 3 scalar upd):  0.32 us
+pdg_step, full tgo search (32 grid + 24 GS): 0.61 us
+pdg_step, bounded re-optimisation:          0.60 us
+nn_policy_eval (8-64-64-3 MLP, 4953 params):  2.82 us

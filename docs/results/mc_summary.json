@@ -1,0 +1,118 @@
+{
+  "baseline": {
+    "n": 200,
+    "outcomes": {
+      "landed_pad": 0.62,
+      "landed_backup": 0.0,
+      "landed_offsite": 0.065,
+      "hard_landing": 0.315,
+      "crash": 0.0,
+      "timeout": 0.0
+    },
+    "failure_taxonomy": {
+      "propellant_exhausted": 0.275,
+      "far_from_pad_gt100m": 0.06,
+      "other": 0.045
+    },
+    "wind_aloft_mean_success": 14.80239772008028,
+    "wind_aloft_mean_failure": 20.69578967188873,
+    "soft_landing_rate": 0.685,
+    "miss_median": 0.7702554976071563,
+    "miss_p95": 2.6110071050930137,
+    "miss_max": 7.135794878772399,
+    "vz_p95": 1.2749577641561505,
+    "vh_p95": 0.4881305291032525,
+    "tilt_p95": 3.6758174054790778,
+    "prop_mean": 23615.52681715526,
+    "prop_p95": 30455.51299371458,
+    "nav_nees_pos_mean": 2.097466316100861,
+    "wind_err_at_ign_median": 5.409406025790254
+  },
+  "no_wind_ff": {
+    "n": 200,
+    "outcomes": {
+      "landed_pad": 0.66,
+      "landed_backup": 0.0,
+      "landed_offsite": 0.06,
+      "hard_landing": 0.28,
+      "crash": 0.0,
+      "timeout": 0.0
+    },
+    "failure_taxonomy": {
+      "propellant_exhausted": 0.255,
+      "far_from_pad_gt100m": 0.045,
+      "other": 0.04
+    },
+    "wind_aloft_mean_success": 15.037060346760867,
+    "wind_aloft_mean_failure": 20.933608332074467,
+    "soft_landing_rate": 0.72,
+    "miss_median": 1.3619667956217993,
+    "miss_p95": 5.606440371425424,
+    "miss_max": 9.105844772789013,
+    "vz_p95": 1.2481034224464251,
+    "vh_p95": 0.6552015238414473,
+    "tilt_p95": 3.0599962399972434,
+    "prop_mean": 23373.415958177877,
+    "prop_p95": 30434.56665671867,
+    "nav_nees_pos_mean": 2.2552615918777885,
+    "wind_err_at_ign_median": 5.939879100711577
+  },
+  "engine_out": {
+    "n": 120,
+    "outcomes": {
+      "landed_pad": 0.625,
+      "landed_backup": 0.0,
+      "landed_offsite": 0.058333333333333334,
+      "hard_landing": 0.31666666666666665,
+      "crash": 0.0,
+      "timeout": 0.0
+    },
+    "failure_taxonomy": {
+      "propellant_exhausted": 0.3,
+      "far_from_pad_gt100m": 0.03333333333333333,
+      "other": 0.041666666666666664
+    },
+    "wind_aloft_mean_success": 15.730679956129862,
+    "wind_aloft_mean_failure": 20.875965801296594,
+    "soft_landing_rate": 0.6833333333333333,
+    "miss_median": 0.6280600731534179,
+    "miss_p95": 1.9925552808913725,
+    "miss_max": 9.76968895275177,
+    "vz_p95": 1.256075674136307,
+    "vh_p95": 0.48357439073569874,
+    "tilt_p95": 4.322290398092947,
+    "prop_mean": 24110.43995286093,
+    "prop_p95": 30449.149953004675,
+    "nav_nees_pos_mean": 2.2364249179181788,
+    "wind_err_at_ign_median": 4.6951358006803385
+  },
+  "neural": {
+    "n": 80,
+    "outcomes": {
+      "landed_pad": 0.175,
+      "landed_backup": 0.0,
+      "landed_offsite": 0.0625,
+      "hard_landing": 0.7625,
+      "crash": 0.0,
+      "timeout": 0.0
+    },
+    "failure_taxonomy": {
+      "propellant_exhausted": 0.4875,
+      "far_from_pad_gt100m": 0.0375,
+      "other": 0.3
+    },
+    "wind_aloft_mean_success": 13.49375675998177,
+    "wind_aloft_mean_failure": 17.697178473851274,
+    "soft_landing_rate": 0.2375,
+    "miss_median": 0.8042997666996082,
+    "miss_p95": 3.2146683481605147,
+    "miss_max": 3.7820942251338496,
+    "vz_p95": 1.253002347272914,
+    "vh_p95": 0.5796206599915172,
+    "tilt_p95": 3.1319134346696016,
+    "prop_mean": 21541.655053228602,
+    "prop_p95": 30886.45789224021,
+    "nav_nees_pos_mean": 2.1402510390376857,
+    "wind_err_at_ign_median": 6.387421662674986
+  }
+}
