@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+fsw/build/
+out/
+*.npz
+.pytest_cache/
