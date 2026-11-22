@@ -28,7 +28,6 @@
 #define VEH_T_MAX_EACH      1.6e6f
 #define VEH_THROTTLE_MIN    0.40f
 #define VEH_ISP             330.0f
-#define VEH_ENG_RING_R      1.6f
 #define VEH_GIMBAL_MAX      0.258819f  /* sin(15 deg) as lateral thrust fraction */
 #define VEH_SPOOL_UP_TIME   1.5f
 #define VEH_STRIP_LEN       10.0f
@@ -44,7 +43,8 @@ extern const float VEH_STRIP_X[FSW_N_STRIP];
 extern const float VEH_FLAP_X[FSW_N_FLAP];
 extern const float VEH_FLAP_Y[FSW_N_FLAP];
 extern const float VEH_FLAP_AREA[FSW_N_FLAP];
-extern const float VEH_ENG_ANGLE[FSW_N_ENG];
+extern const float VEH_ENG_Y[FSW_N_ENG];   /* engine positions in the B y-z plane */
+extern const float VEH_ENG_Z[FSW_N_ENG];
 
 /* ---------------- navigation tuning ---------------- */
 #define NAV_GYRO_ARW        4.4e-5f    /* rad/sqrt(s)        */
@@ -53,8 +53,10 @@ extern const float VEH_ENG_ANGLE[FSW_N_ENG];
 #define NAV_ACCEL_BIAS_RW   1.0e-5f
 #define NAV_VEL_PROC_EXTRA  0.02f      /* unmodelled vibration / lever arm [m/s/sqrt(s)] */
 #define NAV_POS_PROC        0.01f
-#define NAV_GNSS_POS_SIG_H  1.5f       /* inflated for correlated GNSS bias (not estimated) */
-#define NAV_GNSS_POS_SIG_V  2.6f
+#define NAV_GNSS_POS_SIG_H  1.0f       /* white part; the correlated part is a filter state */
+#define NAV_GNSS_POS_SIG_V  2.0f
+#define NAV_GNSS_BIAS_SIG   0.5f       /* Gauss-Markov GNSS bias, steady-state sigma [m] */
+#define NAV_GNSS_BIAS_TAU   100.0f     /* correlation time [s] */
 #define NAV_GNSS_VEL_SIG    0.08f
 #define NAV_RADAR_SIG_ABS   0.35f
 #define NAV_RADAR_SIG_REL   0.006f

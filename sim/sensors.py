@@ -25,6 +25,7 @@ class SensorFrame:
     radar_antenna: int = 0          # 0 = belly (+z_B boresight), 1 = aft (-x_B boresight)
     radar_range: float = 0.0
     pc: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    eng_ready: np.ndarray = field(default_factory=lambda: np.ones(3, bool))
     touchdown: bool = False
 
 
@@ -38,7 +39,7 @@ class SensorSuite:
         self.radar_last = None
         self.pc_last = None
 
-    def sample(self, t, x, f_b, pc_true, legs_contact: bool) -> SensorFrame:
+    def sample(self, t, x, f_b, pc_true, legs_contact: bool, eng_failed=None) -> SensorFrame:
         sp, rng, dt = self.sp, self.rng, self.dt
         r, v, q, w = x[0:3], x[3:6], x[6:10], x[10:13]
         fr = SensorFrame(t=t)
@@ -85,6 +86,8 @@ class SensorSuite:
             i = self.faults.engine_fail_index
             pc[i] = self.pc_last[i]
         fr.pc = pc
+        if eng_failed is not None:
+            fr.eng_ready = ~np.asarray(eng_failed, bool)
         fr.touchdown = legs_contact
         self.k += 1
         return fr

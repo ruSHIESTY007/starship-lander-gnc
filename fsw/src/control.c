@@ -45,8 +45,8 @@ void engine_offset_torque(const float T_each[3], float tau[3])
     int i;
     v3_zero(tau);
     for (i = 0; i < FSW_N_ENG; ++i) {
-        const float y = VEH_ENG_RING_R * cosf(VEH_ENG_ANGLE[i]);
-        const float z = VEH_ENG_RING_R * sinf(VEH_ENG_ANGLE[i]);
+        const float y = VEH_ENG_Y[i];
+        const float z = VEH_ENG_Z[i];
         /* r x (T,0,0) = (0, z T, -y T) */
         tau[1] += z * T_each[i];
         tau[2] -= y * T_each[i];

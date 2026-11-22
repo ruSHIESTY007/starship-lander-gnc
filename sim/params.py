@@ -37,8 +37,8 @@ class VehicleParams:
     T_max_each: float = 1.6e6         # sea-level max thrust per engine [N]
     throttle_min: float = 0.40
     isp: float = 330.0                # sea-level Isp [s]
-    engine_ring_radius: float = 1.6   # engines on a ring in the B y-z plane
-    engine_ring_angles_deg: tuple = (90.0, 210.0, 330.0)
+    # engine positions in the B y-z plane: centre engine + two outboard engines
+    engine_yz: tuple = ((0.0, 0.0), (1.6, 0.0), (-1.6, 0.0))
     gimbal_max_deg: float = 15.0
     gimbal_rate_deg_s: float = 30.0
     gimbal_tau: float = 0.04
@@ -89,9 +89,8 @@ class VehicleParams:
         return np.pi * (0.5 * self.diameter) ** 2
 
     def engine_positions(self) -> np.ndarray:
-        a = np.deg2rad(np.asarray(self.engine_ring_angles_deg))
-        rr = self.engine_ring_radius
-        return np.stack([np.full_like(a, self.x_aft), rr * np.cos(a), rr * np.sin(a)], axis=1)
+        yz = np.asarray(self.engine_yz, float)
+        return np.stack([np.full(len(yz), self.x_aft), yz[:, 0], yz[:, 1]], axis=1)
 
     def flap_positions(self) -> np.ndarray:
         return np.stack([self.flap_x, self.flap_y, np.zeros(4)], axis=1)
@@ -143,6 +142,7 @@ class EnvParams:
 class FaultParams:
     engine_fail_time: float | None = None
     engine_fail_index: int = 0
+    engine_failures: tuple = ()           # additional ((t, index), ...) failures
     gnss_dropout: tuple | None = None     # (t0, t1)
     gnss_step_bias: tuple | None = None   # (t0, (bx, by, bz)) persistent step
     radar_stuck_time: float | None = None

@@ -99,11 +99,14 @@ class Simulation:
             if flt.engine_fail_time is not None and t >= flt.engine_fail_time \
                     and not self.eng.fail_flag[flt.engine_fail_index]:
                 self.eng.fail(flt.engine_fail_index)
+            for tf, idx in flt.engine_failures:
+                if t >= tf and not self.eng.fail_flag[idx]:
+                    self.eng.fail(idx)
             # specific force at the sample instant (consistent with current actuators)
             F_e, M_e = self.eng.forces()
             wind_L = self.wind.total(t, x[2])
             _, f_b, info = self.body.deriv(x, F_e, M_e + self.rcs.tau, self.eng.mdot(), wind_L, self.flaps.e)
-            frame = self.sens.sample(t, x, f_b, self.eng.chamber_pressure(), False)
+            frame = self.sens.sample(t, x, f_b, self.eng.chamber_pressure(), False, self.eng.fail_flag)
             cmd, tlm = self.ctrl.step(frame)
             if k % self.log_every == 0:
                 for key, val in (("t", t), ("r", x[0:3].copy()), ("v", x[3:6].copy()),
@@ -157,7 +160,7 @@ class Simulation:
                 and rate <= TD_MAX_RATE_DEG_S)
         if soft and d_pad <= sc.pad_radius:
             outcome = "landed_pad"
-        elif soft and d_bak <= 30.0:
+        elif soft and d_bak <= 75.0:
             outcome = "landed_backup"
         elif soft:
             outcome = "landed_offsite"

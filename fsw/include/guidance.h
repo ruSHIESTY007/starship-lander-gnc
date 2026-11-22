@@ -22,20 +22,35 @@
 
 /* ---------------- glide ---------------- */
 #define GLIDE_TILT_MAX      0.349066f  /* 20 deg max aero-force tilt from vertical */
-#define GLIDE_TGO_MIN       6.0f
+#define GLIDE_K_ZEM         6.0f       /* ZEM/ZEV gains */
+#define GLIDE_K_ZEV         2.0f
+#define GLIDE_LEVEL_TIME    2.5f       /* fade steering out over the last 2.5-5 s before the flip */
+#define GLIDE_ALPHA_MARGIN  0.349066f  /* AoA kept within 90 +/- 20 deg */
+#define GLIDE_TGO_MIN       15.0f      /* floor: bounds the ZEM/ZEV gains late in the glide (slow yaw) */
+
+#define GLIDE_HDG_RATE      0.0873f    /* 5 deg/s heading-line slew limit (continuity reference) */
+#define GLIDE_HDG_DEADBAND  0.5f       /* m/s^2: below this, hold heading */
 
 /**
+ * Decoupled glide steering. An axisymmetric body can only produce horizontal force along
+ * its own (horizontal) axis direction, so cross-heading corrections need a yaw, which is
+ * slow. Commanding the full horizontal vector directly leads to a heading-chase spiral.
+ * Instead: the along-heading component is realised immediately by pitch, while a
+ * rate-limited heading command turns the axis toward the desired force line (either
+ * nose or tail, whichever is closer: at most 90 deg).
+ *
  * @param r, v       nav position / velocity (L)
  * @param wind       wind estimate at current altitude (L)
  * @param aim        aim point (x, y) for ignition
  * @param h_ign      current ignition altitude estimate
- * @param x_cur      current body x axis in L (for heading continuity)
+ * @param hdg        in/out heading command (unit horizontal vector, 2D)
+ * @param dt         step [s]
  * @param q_des      output attitude target (belly into the airflow)
- * @param a_h_cmd    output commanded horizontal acceleration (x, y) [m/s^2]
+ * @param a_h_cmd    output achievable horizontal acceleration command (x, y) [m/s^2]
  * @return 0 ok, -1 degenerate (q_des untouched)
  */
 int glide_guidance(const float r[3], const float v[3], const float wind[3], const float aim[2],
-                   float h_ign, const float x_cur[3], float q_des[4], float a_h_cmd[2]);
+                   float h_ign, float hdg[2], float dt, float q_des[4], float a_h_cmd[2]);
 
 /** Desired body axis that makes the crossflow normal force point along n_des (unit). */
 void glide_axis_for_force(const float v_air[3], const float n_des[3], const float x_cur[3],
@@ -79,8 +94,9 @@ int thrust_project(const float F_des[3], float T_min, float T_max, float tilt_ma
 
 /* ---------------- terminal descent ---------------- */
 #define TERM_V_TD       1.0f      /* touchdown descent rate [m/s] */
-#define TERM_K_V        1.2f      /* velocity loop gain [1/s] */
-#define TERM_K_P        0.35f     /* lateral position gain [1/s] */
+#define TERM_K_V        1.2f      /* vertical velocity loop gain [1/s] */
+#define TERM_K_VH       0.6f      /* lateral velocity loop gain [1/s] (attitude-limited) */
+#define TERM_K_P        0.25f     /* lateral position gain [1/s] */
 #define TERM_VH_MAX     2.5f
 
 void terminal_accel(const float r[3], const float v[3], const float pad[3], float h_gate,

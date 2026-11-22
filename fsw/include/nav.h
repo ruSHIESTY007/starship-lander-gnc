@@ -1,10 +1,13 @@
 /**
  * @file nav.h
- * @brief 15-state error-state Kalman filter (GNSS / IMU / radar altimeter).
+ * @brief 18-state error-state Kalman filter (GNSS / IMU / radar altimeter).
  *
- * Nominal state: position p_L, velocity v_L, attitude q_LB, gyro bias b_g, accel bias b_a.
- * Error state:   dx = [dp(3) dv(3) dth(3) dbg(3) dba(3)], dth a body-frame (right) rotation
- *                error: R_true = R_hat (I + [dth]x).
+ * Nominal state: position p_L, velocity v_L, attitude q_LB, gyro bias b_g, accel bias b_a,
+ *                GNSS position bias b_n (first-order Gauss-Markov, tau = NAV_GNSS_BIAS_TAU).
+ * Error state:   dx = [dp(3) dv(3) dth(3) dbg(3) dba(3) dbn(3)], dth a body-frame (right)
+ *                rotation error: R_true = R_hat (I + [dth]x).
+ * Modelling the time-correlated GNSS bias keeps the position covariance honest: white-noise
+ * R inflation cannot, because 10 Hz updates average white noise but not a slow bias.
  *
  * Propagation is driven by the IMU at the executive rate. Measurement updates are
  * processed as sequential scalar updates (no matrix inverse) after a vector chi-square
@@ -16,12 +19,13 @@
 
 #include <stdint.h>
 
-#define NAV_NX 15
+#define NAV_NX 18
 #define NAV_IP 0
 #define NAV_IV 3
 #define NAV_ITH 6
 #define NAV_IBG 9
 #define NAV_IBA 12
+#define NAV_IBN 15
 
 enum { NAV_SENS_GNSS_POS = 0, NAV_SENS_GNSS_VEL, NAV_SENS_RADAR, NAV_N_SENS };
 
@@ -37,7 +41,7 @@ typedef struct {
 } nav_health_t;
 
 typedef struct {
-    float p[3], v[3], q[4], bg[3], ba[3];
+    float p[3], v[3], q[4], bg[3], ba[3], bn[3];
     float P[NAV_NX * NAV_NX];
     float dx[NAV_NX];
     float omega_b[3];        /* bias-corrected angular rate */

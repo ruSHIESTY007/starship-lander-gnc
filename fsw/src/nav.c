@@ -29,14 +29,16 @@ void nav_init(nav_t *nav, const float p0[3], const float v0[3], const float q0[4
               const nav_init_sigma_t *sig)
 {
     int i;
-    const float var[5] = { sig->pos * sig->pos, sig->vel * sig->vel, sig->att * sig->att,
-                           sig->gyro_bias * sig->gyro_bias, sig->accel_bias * sig->accel_bias };
+    const float var[6] = { sig->pos * sig->pos, sig->vel * sig->vel, sig->att * sig->att,
+                           sig->gyro_bias * sig->gyro_bias, sig->accel_bias * sig->accel_bias,
+                           NAV_GNSS_BIAS_SIG * NAV_GNSS_BIAS_SIG };
     v3_copy(nav->p, p0);
     v3_copy(nav->v, v0);
     q_copy(nav->q, q0);
     (void)q_normalize(nav->q);
     v3_zero(nav->bg);
     v3_zero(nav->ba);
+    v3_zero(nav->bn);
     v3_zero(nav->omega_b);
     v3_zero(nav->f_b);
     mat_zero(nav->P, NX, NX);
@@ -64,7 +66,8 @@ void nav_propagate(nav_t *nav, const float gyro[3], const float accel[3], float 
     v3_sub(nav->f_b, accel, nav->ba);
     q_to_dcm(R, nav->q);
 
-    /* ---- nominal state (trapezoid-free first-order strapdown, 100 Hz) ---- */
+    /* ---- nominal state (first-order strapdown, 100 Hz); GNSS bias decays ---- */
+    v3_scale(nav->bn, nav->bn, expf(-dt / NAV_GNSS_BIAS_TAU));
     m3_mul_v(aL, R, nav->f_b);
     v3_add(aL, aL, g);
     v3_axpy(nav->p, dt, nav->v);
@@ -90,6 +93,10 @@ void nav_propagate(nav_t *nav, const float gyro[3], const float accel[3], float 
     for (i = 0; i < 9; ++i) { S[i] = -dt * S[i]; }
     S[0] += 1.0f; S[4] += 1.0f; S[8] += 1.0f;
     set_block3(s_Phi, NAV_ITH, NAV_ITH, S, 1.0f);                /* I - [w]x dt     */
+    {
+        const float phi_n = expf(-dt / NAV_GNSS_BIAS_TAU);       /* GNSS bias Gauss-Markov */
+        for (i = 0; i < 3; ++i) { s_Phi[(NAV_IBN + i) * NX + (NAV_IBN + i)] = phi_n; }
+    }
 
     /* ---- P = Phi P Phi^T + Qd ---- */
     mat_mul(s_T, s_Phi, nav->P, NX, NX, NX);
@@ -100,12 +107,14 @@ void nav_propagate(nav_t *nav, const float gyro[3], const float accel[3], float 
         const float qbg = NAV_GYRO_BIAS_RW * NAV_GYRO_BIAS_RW * dt;
         const float qba = NAV_ACCEL_BIAS_RW * NAV_ACCEL_BIAS_RW * dt;
         const float qp = NAV_POS_PROC * NAV_POS_PROC * dt;
+        const float qbn = NAV_GNSS_BIAS_SIG * NAV_GNSS_BIAS_SIG * (1.0f - expf(-2.0f * dt / NAV_GNSS_BIAS_TAU));
         for (i = 0; i < 3; ++i) {
             nav->P[(NAV_IP + i) * (NX + 1)] += qp;
             nav->P[(NAV_IV + i) * (NX + 1)] += qv;
             nav->P[(NAV_ITH + i) * (NX + 1)] += qth;
             nav->P[(NAV_IBG + i) * (NX + 1)] += qbg;
             nav->P[(NAV_IBA + i) * (NX + 1)] += qba;
+            nav->P[(NAV_IBN + i) * (NX + 1)] += qbn;
         }
     }
     mat_symmetrize(nav->P, NX);
@@ -122,6 +131,7 @@ static void inject(nav_t *nav)
         nav->v[i] += nav->dx[NAV_IV + i];
         nav->bg[i] += nav->dx[NAV_IBG + i];
         nav->ba[i] += nav->dx[NAV_IBA + i];
+        nav->bn[i] += nav->dx[NAV_IBN + i];
     }
     q_from_rotvec(dq, &nav->dx[NAV_ITH]);
     q_mul(qn, nav->q, dq);
@@ -137,7 +147,7 @@ static void inject(nav_t *nav)
 static int vector_update(nav_t *nav, int sens, int m, const float *H, const float *resid,
                          const float *rvar, float gate)
 {
-    static float PHt[NX * 3];
+    static float PHt[NX * 3];  /* m <= 3 */
     static float Ph[NX];
     float S[9], y[3];
     float nis;
@@ -208,7 +218,8 @@ int nav_update_gnss_pos(nav_t *nav, const float pos[3])
     mat_zero(H, 3, NX);
     for (i = 0; i < 3; ++i) {
         H[i * NX + NAV_IP + i] = 1.0f;
-        r[i] = pos[i] - nav->p[i];
+        H[i * NX + NAV_IBN + i] = 1.0f;                 /* z = p + b_n + white */
+        r[i] = pos[i] - nav->p[i] - nav->bn[i];
     }
     rv[0] = NAV_GNSS_POS_SIG_H * NAV_GNSS_POS_SIG_H;
     rv[1] = rv[0];
